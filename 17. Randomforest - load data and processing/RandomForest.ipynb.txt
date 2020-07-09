@@ -1,0 +1,1232 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.002146Z",
+     "start_time": "2020-07-07T03:24:36.996132Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Update sklearn to prevent version mismatches\n",
+    "#!pip install sklearn --upgrade"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.018147Z",
+     "start_time": "2020-07-07T03:24:37.005137Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# install joblib. This will be used to save your model. \n",
+    "# Restart your kernel after installing \n",
+    "#!pip install joblib"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.516176Z",
+     "start_time": "2020-07-07T03:24:37.020133Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Read the CSV and Perform Basic Data Cleaning"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.610152Z",
+     "start_time": "2020-07-07T03:24:37.518131Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>koi_disposition</th>\n",
+       "      <th>koi_fpflag_nt</th>\n",
+       "      <th>koi_fpflag_ss</th>\n",
+       "      <th>koi_fpflag_co</th>\n",
+       "      <th>koi_fpflag_ec</th>\n",
+       "      <th>koi_period</th>\n",
+       "      <th>koi_period_err1</th>\n",
+       "      <th>koi_period_err2</th>\n",
+       "      <th>koi_time0bk</th>\n",
+       "      <th>koi_time0bk_err1</th>\n",
+       "      <th>...</th>\n",
+       "      <th>koi_steff_err2</th>\n",
+       "      <th>koi_slogg</th>\n",
+       "      <th>koi_slogg_err1</th>\n",
+       "      <th>koi_slogg_err2</th>\n",
+       "      <th>koi_srad</th>\n",
+       "      <th>koi_srad_err1</th>\n",
+       "      <th>koi_srad_err2</th>\n",
+       "      <th>ra</th>\n",
+       "      <th>dec</th>\n",
+       "      <th>koi_kepmag</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>CONFIRMED</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>54.418383</td>\n",
+       "      <td>2.479000e-04</td>\n",
+       "      <td>-2.479000e-04</td>\n",
+       "      <td>162.513840</td>\n",
+       "      <td>0.003520</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-81</td>\n",
+       "      <td>4.467</td>\n",
+       "      <td>0.064</td>\n",
+       "      <td>-0.096</td>\n",
+       "      <td>0.927</td>\n",
+       "      <td>0.105</td>\n",
+       "      <td>-0.061</td>\n",
+       "      <td>291.93423</td>\n",
+       "      <td>48.141651</td>\n",
+       "      <td>15.347</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>FALSE POSITIVE</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>19.899140</td>\n",
+       "      <td>1.490000e-05</td>\n",
+       "      <td>-1.490000e-05</td>\n",
+       "      <td>175.850252</td>\n",
+       "      <td>0.000581</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-176</td>\n",
+       "      <td>4.544</td>\n",
+       "      <td>0.044</td>\n",
+       "      <td>-0.176</td>\n",
+       "      <td>0.868</td>\n",
+       "      <td>0.233</td>\n",
+       "      <td>-0.078</td>\n",
+       "      <td>297.00482</td>\n",
+       "      <td>48.134129</td>\n",
+       "      <td>15.436</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>FALSE POSITIVE</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1.736952</td>\n",
+       "      <td>2.630000e-07</td>\n",
+       "      <td>-2.630000e-07</td>\n",
+       "      <td>170.307565</td>\n",
+       "      <td>0.000115</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-174</td>\n",
+       "      <td>4.564</td>\n",
+       "      <td>0.053</td>\n",
+       "      <td>-0.168</td>\n",
+       "      <td>0.791</td>\n",
+       "      <td>0.201</td>\n",
+       "      <td>-0.067</td>\n",
+       "      <td>285.53461</td>\n",
+       "      <td>48.285210</td>\n",
+       "      <td>15.597</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>CONFIRMED</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>2.525592</td>\n",
+       "      <td>3.760000e-06</td>\n",
+       "      <td>-3.760000e-06</td>\n",
+       "      <td>171.595550</td>\n",
+       "      <td>0.001130</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-211</td>\n",
+       "      <td>4.438</td>\n",
+       "      <td>0.070</td>\n",
+       "      <td>-0.210</td>\n",
+       "      <td>1.046</td>\n",
+       "      <td>0.334</td>\n",
+       "      <td>-0.133</td>\n",
+       "      <td>288.75488</td>\n",
+       "      <td>48.226200</td>\n",
+       "      <td>15.509</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>CONFIRMED</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>4.134435</td>\n",
+       "      <td>1.050000e-05</td>\n",
+       "      <td>-1.050000e-05</td>\n",
+       "      <td>172.979370</td>\n",
+       "      <td>0.001900</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-232</td>\n",
+       "      <td>4.486</td>\n",
+       "      <td>0.054</td>\n",
+       "      <td>-0.229</td>\n",
+       "      <td>0.972</td>\n",
+       "      <td>0.315</td>\n",
+       "      <td>-0.105</td>\n",
+       "      <td>296.28613</td>\n",
+       "      <td>48.224670</td>\n",
+       "      <td>15.714</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 41 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  koi_disposition  koi_fpflag_nt  koi_fpflag_ss  koi_fpflag_co  koi_fpflag_ec  \\\n",
+       "0       CONFIRMED              0              0              0              0   \n",
+       "1  FALSE POSITIVE              0              1              0              0   \n",
+       "2  FALSE POSITIVE              0              1              0              0   \n",
+       "3       CONFIRMED              0              0              0              0   \n",
+       "4       CONFIRMED              0              0              0              0   \n",
+       "\n",
+       "   koi_period  koi_period_err1  koi_period_err2  koi_time0bk  \\\n",
+       "0   54.418383     2.479000e-04    -2.479000e-04   162.513840   \n",
+       "1   19.899140     1.490000e-05    -1.490000e-05   175.850252   \n",
+       "2    1.736952     2.630000e-07    -2.630000e-07   170.307565   \n",
+       "3    2.525592     3.760000e-06    -3.760000e-06   171.595550   \n",
+       "4    4.134435     1.050000e-05    -1.050000e-05   172.979370   \n",
+       "\n",
+       "   koi_time0bk_err1  ...  koi_steff_err2  koi_slogg  koi_slogg_err1  \\\n",
+       "0          0.003520  ...             -81      4.467           0.064   \n",
+       "1          0.000581  ...            -176      4.544           0.044   \n",
+       "2          0.000115  ...            -174      4.564           0.053   \n",
+       "3          0.001130  ...            -211      4.438           0.070   \n",
+       "4          0.001900  ...            -232      4.486           0.054   \n",
+       "\n",
+       "   koi_slogg_err2  koi_srad  koi_srad_err1  koi_srad_err2         ra  \\\n",
+       "0          -0.096     0.927          0.105         -0.061  291.93423   \n",
+       "1          -0.176     0.868          0.233         -0.078  297.00482   \n",
+       "2          -0.168     0.791          0.201         -0.067  285.53461   \n",
+       "3          -0.210     1.046          0.334         -0.133  288.75488   \n",
+       "4          -0.229     0.972          0.315         -0.105  296.28613   \n",
+       "\n",
+       "         dec  koi_kepmag  \n",
+       "0  48.141651      15.347  \n",
+       "1  48.134129      15.436  \n",
+       "2  48.285210      15.597  \n",
+       "3  48.226200      15.509  \n",
+       "4  48.224670      15.714  \n",
+       "\n",
+       "[5 rows x 41 columns]"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = pd.read_csv(\"exoplanet_data.csv\")\n",
+    "# Drop the null columns where all values are null\n",
+    "df = df.dropna(axis='columns', how='all')\n",
+    "# Drop the null rows\n",
+    "df = df.dropna()\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Select your features (columns)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.626146Z",
+     "start_time": "2020-07-07T03:24:37.612131Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Index(['koi_disposition', 'koi_fpflag_nt', 'koi_fpflag_ss', 'koi_fpflag_co',\n",
+       "       'koi_fpflag_ec', 'koi_period', 'koi_period_err1', 'koi_period_err2',\n",
+       "       'koi_time0bk', 'koi_time0bk_err1', 'koi_time0bk_err2', 'koi_impact',\n",
+       "       'koi_impact_err1', 'koi_impact_err2', 'koi_duration',\n",
+       "       'koi_duration_err1', 'koi_duration_err2', 'koi_depth', 'koi_depth_err1',\n",
+       "       'koi_depth_err2', 'koi_prad', 'koi_prad_err1', 'koi_prad_err2',\n",
+       "       'koi_teq', 'koi_insol', 'koi_insol_err1', 'koi_insol_err2',\n",
+       "       'koi_model_snr', 'koi_tce_plnt_num', 'koi_steff', 'koi_steff_err1',\n",
+       "       'koi_steff_err2', 'koi_slogg', 'koi_slogg_err1', 'koi_slogg_err2',\n",
+       "       'koi_srad', 'koi_srad_err1', 'koi_srad_err2', 'ra', 'dec',\n",
+       "       'koi_kepmag'],\n",
+       "      dtype='object')"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.columns"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:37.641132Z",
+     "start_time": "2020-07-07T03:24:37.628131Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Set features. This will also be used as your x values.\n",
+    "features = ['koi_fpflag_nt', 'koi_fpflag_ss', 'koi_fpflag_co',\n",
+    "       'koi_fpflag_ec', 'koi_period', 'koi_period_err1', 'koi_period_err2',\n",
+    "       'koi_time0bk', 'koi_time0bk_err1', 'koi_time0bk_err2', 'koi_impact',\n",
+    "       'koi_impact_err1', 'koi_impact_err2', 'koi_duration',\n",
+    "       'koi_duration_err1', 'koi_duration_err2', 'koi_depth', 'koi_depth_err1',\n",
+    "       'koi_depth_err2', 'koi_prad', 'koi_prad_err1', 'koi_prad_err2',\n",
+    "       'koi_teq', 'koi_insol', 'koi_insol_err1', 'koi_insol_err2',\n",
+    "       'koi_model_snr', 'koi_tce_plnt_num', 'koi_steff', 'koi_steff_err1',\n",
+    "       'koi_steff_err2', 'koi_slogg', 'koi_slogg_err1', 'koi_slogg_err2',\n",
+    "       'koi_srad', 'koi_srad_err1', 'koi_srad_err2', 'ra', 'dec',\n",
+    "       'koi_kepmag']\n",
+    "\n",
+    "# remove some features\n",
+    "# Identfied features that do not contribute by running decision tree selecting features that contribute less than 1%\n",
+    "\n",
+    "# features.remove('koi_impact_err1')\n",
+    "# features.remove('koi_impact_err2')\n",
+    "# features.remove('dec')\n",
+    "# features.remove('koi_kepmag')\n",
+    "# features.remove('koi_period_err2')\n",
+    "# features.remove('koi_depth_err1')\n",
+    "# features.remove('koi_slogg')\n",
+    "# features.remove('koi_steff_err2')\n",
+    "# features.remove('koi_time0bk')\n",
+    "# features.remove('koi_depth_err2')\n",
+    "# features.remove('koi_prad_err1')\n",
+    "# features.remove('koi_srad_err1')\n",
+    "# features.remove('koi_srad_err2')\n",
+    "# features.remove('koi_time0bk_err2')\n",
+    "# features.remove('koi_srad')\n",
+    "# features.remove('ra')\n",
+    "# features.remove('koi_prad_err2')\n",
+    "# features.remove('koi_slogg_err1')\n",
+    "# features.remove('koi_time0bk_err1')\n",
+    "# features.remove('koi_tce_plnt_num')\n",
+    "# features.remove('koi_steff')\n",
+    "\n",
+    "\n",
+    "X = df[features]\n",
+    "y=df['koi_disposition']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Create a Train Test Split\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.108147Z",
+     "start_time": "2020-07-07T03:24:37.644133Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn import preprocessing\n",
+    "le = preprocessing.LabelEncoder()\n",
+    "le.fit(y)\n",
+    "classes = le.classes_\n",
+    "y =le.transform(y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.155147Z",
+     "start_time": "2020-07-07T03:24:38.110131Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.model_selection import train_test_split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42,stratify=y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.186130Z",
+     "start_time": "2020-07-07T03:24:38.158137Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>koi_fpflag_nt</th>\n",
+       "      <th>koi_fpflag_ss</th>\n",
+       "      <th>koi_fpflag_co</th>\n",
+       "      <th>koi_fpflag_ec</th>\n",
+       "      <th>koi_period</th>\n",
+       "      <th>koi_period_err1</th>\n",
+       "      <th>koi_period_err2</th>\n",
+       "      <th>koi_time0bk</th>\n",
+       "      <th>koi_time0bk_err1</th>\n",
+       "      <th>koi_time0bk_err2</th>\n",
+       "      <th>...</th>\n",
+       "      <th>koi_steff_err2</th>\n",
+       "      <th>koi_slogg</th>\n",
+       "      <th>koi_slogg_err1</th>\n",
+       "      <th>koi_slogg_err2</th>\n",
+       "      <th>koi_srad</th>\n",
+       "      <th>koi_srad_err1</th>\n",
+       "      <th>koi_srad_err2</th>\n",
+       "      <th>ra</th>\n",
+       "      <th>dec</th>\n",
+       "      <th>koi_kepmag</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>5249</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>505.462916</td>\n",
+       "      <td>8.292000e-03</td>\n",
+       "      <td>-8.292000e-03</td>\n",
+       "      <td>458.077550</td>\n",
+       "      <td>0.008630</td>\n",
+       "      <td>-0.008630</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-167</td>\n",
+       "      <td>4.499</td>\n",
+       "      <td>0.095</td>\n",
+       "      <td>-0.114</td>\n",
+       "      <td>0.833</td>\n",
+       "      <td>0.068</td>\n",
+       "      <td>-0.084</td>\n",
+       "      <td>289.53882</td>\n",
+       "      <td>41.892818</td>\n",
+       "      <td>15.768</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4553</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>16.934810</td>\n",
+       "      <td>1.990000e-04</td>\n",
+       "      <td>-1.990000e-04</td>\n",
+       "      <td>137.250200</td>\n",
+       "      <td>0.010300</td>\n",
+       "      <td>-0.010300</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-139</td>\n",
+       "      <td>4.589</td>\n",
+       "      <td>0.048</td>\n",
+       "      <td>-0.028</td>\n",
+       "      <td>0.706</td>\n",
+       "      <td>0.046</td>\n",
+       "      <td>-0.061</td>\n",
+       "      <td>285.75146</td>\n",
+       "      <td>41.335640</td>\n",
+       "      <td>15.549</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>428</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0.635070</td>\n",
+       "      <td>7.100000e-08</td>\n",
+       "      <td>-7.100000e-08</td>\n",
+       "      <td>134.020928</td>\n",
+       "      <td>0.000087</td>\n",
+       "      <td>-0.000087</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-206</td>\n",
+       "      <td>4.434</td>\n",
+       "      <td>0.054</td>\n",
+       "      <td>-0.216</td>\n",
+       "      <td>1.058</td>\n",
+       "      <td>0.335</td>\n",
+       "      <td>-0.112</td>\n",
+       "      <td>296.32028</td>\n",
+       "      <td>47.406570</td>\n",
+       "      <td>14.539</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2964</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>2.509334</td>\n",
+       "      <td>4.150000e-05</td>\n",
+       "      <td>-4.150000e-05</td>\n",
+       "      <td>133.112300</td>\n",
+       "      <td>0.013000</td>\n",
+       "      <td>-0.013000</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-261</td>\n",
+       "      <td>4.425</td>\n",
+       "      <td>0.065</td>\n",
+       "      <td>-0.195</td>\n",
+       "      <td>1.081</td>\n",
+       "      <td>0.329</td>\n",
+       "      <td>-0.141</td>\n",
+       "      <td>295.37204</td>\n",
+       "      <td>38.897739</td>\n",
+       "      <td>15.588</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4472</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>290.625016</td>\n",
+       "      <td>7.059000e-03</td>\n",
+       "      <td>-7.059000e-03</td>\n",
+       "      <td>349.709800</td>\n",
+       "      <td>0.017200</td>\n",
+       "      <td>-0.017200</td>\n",
+       "      <td>...</td>\n",
+       "      <td>-156</td>\n",
+       "      <td>3.735</td>\n",
+       "      <td>0.628</td>\n",
+       "      <td>-0.340</td>\n",
+       "      <td>2.409</td>\n",
+       "      <td>1.296</td>\n",
+       "      <td>-1.286</td>\n",
+       "      <td>284.18527</td>\n",
+       "      <td>42.563271</td>\n",
+       "      <td>11.098</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>5 rows × 40 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      koi_fpflag_nt  koi_fpflag_ss  koi_fpflag_co  koi_fpflag_ec  koi_period  \\\n",
+       "5249              0              0              0              0  505.462916   \n",
+       "4553              0              0              0              0   16.934810   \n",
+       "428               1              0              0              0    0.635070   \n",
+       "2964              0              0              0              0    2.509334   \n",
+       "4472              1              0              0              0  290.625016   \n",
+       "\n",
+       "      koi_period_err1  koi_period_err2  koi_time0bk  koi_time0bk_err1  \\\n",
+       "5249     8.292000e-03    -8.292000e-03   458.077550          0.008630   \n",
+       "4553     1.990000e-04    -1.990000e-04   137.250200          0.010300   \n",
+       "428      7.100000e-08    -7.100000e-08   134.020928          0.000087   \n",
+       "2964     4.150000e-05    -4.150000e-05   133.112300          0.013000   \n",
+       "4472     7.059000e-03    -7.059000e-03   349.709800          0.017200   \n",
+       "\n",
+       "      koi_time0bk_err2  ...  koi_steff_err2  koi_slogg  koi_slogg_err1  \\\n",
+       "5249         -0.008630  ...            -167      4.499           0.095   \n",
+       "4553         -0.010300  ...            -139      4.589           0.048   \n",
+       "428          -0.000087  ...            -206      4.434           0.054   \n",
+       "2964         -0.013000  ...            -261      4.425           0.065   \n",
+       "4472         -0.017200  ...            -156      3.735           0.628   \n",
+       "\n",
+       "      koi_slogg_err2  koi_srad  koi_srad_err1  koi_srad_err2         ra  \\\n",
+       "5249          -0.114     0.833          0.068         -0.084  289.53882   \n",
+       "4553          -0.028     0.706          0.046         -0.061  285.75146   \n",
+       "428           -0.216     1.058          0.335         -0.112  296.32028   \n",
+       "2964          -0.195     1.081          0.329         -0.141  295.37204   \n",
+       "4472          -0.340     2.409          1.296         -1.286  284.18527   \n",
+       "\n",
+       "            dec  koi_kepmag  \n",
+       "5249  41.892818      15.768  \n",
+       "4553  41.335640      15.549  \n",
+       "428   47.406570      14.539  \n",
+       "2964  38.897739      15.588  \n",
+       "4472  42.563271      11.098  \n",
+       "\n",
+       "[5 rows x 40 columns]"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_train.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Pre-processing\n",
+    "\n",
+    "Scale the data using the MinMaxScaler and perform some feature selection"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.217131Z",
+     "start_time": "2020-07-07T03:24:38.188132Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Scale your data\n",
+    "mm_scaler = preprocessing.MinMaxScaler()\n",
+    "X_scaler = mm_scaler.fit(X_train)\n",
+    "\n",
+    "X_train_scaled = X_scaler.transform(X_train)\n",
+    "X_test_scaled = X_scaler.transform(X_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.343147Z",
+     "start_time": "2020-07-07T03:24:38.220133Z"
+    },
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.metrics import accuracy_score  \n",
+    "from sklearn.metrics import classification_report \n",
+    "from sklearn import tree\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Train the Model\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.917970Z",
+     "start_time": "2020-07-07T03:24:38.350132Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Create the GridSearchCV model\n",
+    "from sklearn.ensemble import RandomForestClassifier\n",
+    "from sklearn.model_selection import GridSearchCV\n",
+    "\n",
+    "dt = RandomForestClassifier(max_depth=2,  random_state=1024)\n",
+    "model =dt.fit(X_train_scaled, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:38.933953Z",
+     "start_time": "2020-07-07T03:24:38.919947Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "RandomForestClassifier(max_depth=2, random_state=1024)"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:39.043470Z",
+     "start_time": "2020-07-07T03:24:38.935946Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Training Data Score: 0.717274678111588\n",
+      "Testing Data Score: 0.7212294496068621\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"Training Data Score: {model.score(X_train_scaled, y_train)}\")\n",
+    "print(f\"Testing Data Score: {model.score(X_test_scaled, y_test)}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Hyperparameter Tuning\n",
+    "\n",
+    "Use `GridSearchCV` to tune the model's parameters"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-07T03:24:39.058469Z",
+     "start_time": "2020-07-07T03:24:39.045470Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Create the GridSearchCV model\n",
+    "from sklearn.ensemble import RandomForestClassifier\n",
+    "from sklearn.metrics import classification_report\n",
+    "from sklearn.model_selection import GridSearchCV\n",
+    "\n",
+    "param_grid = { \n",
+    "    'n_estimators': [10,25,50,75,100,125],\n",
+    "    'max_depth':[None,1,2,3,4,5,7],\n",
+    "    'max_features': ['auto', 'sqrt', 'log2'],\n",
+    "    'min_samples_split' : [2,3,4,5],\n",
+    "    'bootstrap': [True, False]\n",
+    "    \n",
+    "}\n",
+    "\n",
+    "Gridtree = GridSearchCV(RandomForestClassifier(),  param_grid,n_jobs=-1,cv=3,verbose=3)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.046Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fitting 3 folds for each of 1008 candidates, totalling 3024 fits\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[Parallel(n_jobs=-1)]: Using backend LokyBackend with 8 concurrent workers.\n",
+      "[Parallel(n_jobs=-1)]: Done  16 tasks      | elapsed:    6.0s\n",
+      "[Parallel(n_jobs=-1)]: Done 112 tasks      | elapsed:   31.2s\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Train the model with GridSearch\n",
+    "Gridtree.fit(X_train, y_train)\n",
+    "tree_preds = Gridtree.predict_proba(X_test)[:, 1]\n",
+    "print(\"Best Classifier : %s (Best Score %0.2f)\" % (Gridtree.best_estimator_   , Gridtree.best_score_ ))\n",
+    "\n",
+    "bc = Gridtree.best_estimator_"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-07-03T16:10:18.063087Z",
+     "start_time": "2020-07-03T16:10:18.050085Z"
+    }
+   },
+   "source": [
+    "# Train Model with best estimator"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.049Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "model2 =bc.fit(X_train_scaled, y_train)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Evaluate Model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.052Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "print(f\"Training Data Score: {bc.score(X_train_scaled, y_train)}\")\n",
+    "print(f\"Testing Data Score: {bc.score(X_test_scaled, y_test)}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.055Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "y_true, y_pred = y_test, bc.predict(X_test_scaled)\n",
+    "print(classification_report(y_true, y_pred))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.058Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "print(Gridtree.best_params_)\n",
+    "print(Gridtree.best_score_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.060Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.metrics import confusion_matrix\n",
+    "%matplotlib inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "def plot_confusion_matrix(y_true, y_pred, classes,\n",
+    "                          normalize=False,\n",
+    "                          title=None,\n",
+    "                          cmap=plt.cm.Blues):\n",
+    "    \"\"\"\n",
+    "    This function prints and plots the confusion matrix.\n",
+    "    Normalization can be applied by setting `normalize=True`.\n",
+    "    \"\"\"\n",
+    "    if not title:\n",
+    "        if normalize:\n",
+    "            title = 'Normalized confusion matrix'\n",
+    "        else:\n",
+    "            title = 'Confusion matrix, without normalization'\n",
+    "\n",
+    "    # Compute confusion matrix\n",
+    "    cm = confusion_matrix(y_true, y_pred)\n",
+    "\n",
+    "    if normalize:\n",
+    "        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]\n",
+    "        print(\"Normalized confusion matrix\")\n",
+    "    else:\n",
+    "        print('Confusion matrix, without normalization')\n",
+    "\n",
+    "    fig, ax = plt.subplots(figsize=(8,8))\n",
+    "    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)\n",
+    "    ax.figure.colorbar(im, ax=ax)\n",
+    "    # We want to show all ticks...\n",
+    "    ax.set(xticks=np.arange(cm.shape[1]),\n",
+    "           yticks=np.arange(cm.shape[0]),\n",
+    "           # ... and label them with the respective list entries\n",
+    "           xticklabels=classes, yticklabels=classes,\n",
+    "           title=title,\n",
+    "           ylabel='True label',\n",
+    "           xlabel='Predicted label')\n",
+    "    \n",
+    "    # Rotate the tick labels and set their alignment.\n",
+    "    plt.setp(ax.get_xticklabels(), rotation=45, ha=\"right\",\n",
+    "             rotation_mode=\"anchor\")\n",
+    "\n",
+    "    # Loop over data dimensions and create text annotations.\n",
+    "    fmt = '.2f' if normalize else 'd'\n",
+    "    thresh = cm.max() / 2.\n",
+    "    for i in range(cm.shape[0]):\n",
+    "        for j in range(cm.shape[1]):\n",
+    "            ax.text(j, i, format(cm[i, j], fmt),\n",
+    "                    ha=\"center\", va=\"center\",\n",
+    "                    color=\"white\" if cm[i, j] > thresh else \"black\")\n",
+    "    fig.tight_layout()\n",
+    "    return ax"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.062Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "predictions = model2.predict(X_test_scaled)\n",
+    "#predictions = np.argmax(predictions, axis=1)\n",
+    "\n",
+    "ax = plot_confusion_matrix(y_test, predictions, classes,False,\"Random Forest\")\n",
+    "plt.savefig(\"RandomForestTree.png\")\n",
+    "ax"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Save the Model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.064Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# save your model by updating \"your_name\" with your name\n",
+    "# and \"your_model\" with your model variable\n",
+    "# be sure to turn this in to BCS\n",
+    "# if joblib fails to import, try running the command to install in terminal/git-bash\n",
+    "import joblib\n",
+    "filename = 'carlos_RamdomForest.sav'\n",
+    "joblib.dump(model2, filename)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.065Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.svm import SVC \n",
+    "from sklearn.naive_bayes import GaussianNB\n",
+    "\n",
+    "from xgboost import XGBClassifier\n",
+    "#model= GaussianNB()\n",
+    "#model = SVC()\n",
+    "model = XGBClassifier()\n",
+    "model.fit(X_train_scaled, y_train)\n",
+    "predictions = model.predict(X_test_scaled)\n",
+    "model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.067Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "print(f\"Training Data Score: {model.score(X_train_scaled, y_train)}\")\n",
+    "print(f\"Testing Data Score: {model.score(X_test_scaled, y_test)}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.068Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.model_selection import GridSearchCV\n",
+    "model\n",
+    "param_grid = {'nthread':[4], #when use hyperthread, xgboost may become slower\n",
+    "              'num_class':[3],\n",
+    "              'objective':['multi:softmax'],\n",
+    "              'learning_rate': [ 0.001,0.1, 0.2], \n",
+    "              'max_depth':  range(1,8),\n",
+    "              'min_child_weight':  range(2,10),\n",
+    "              'silent': [1],\n",
+    "              'subsample': [0.8],\n",
+    "              'colsample_bytree': [0.7],\n",
+    "              'n_estimators': [50,100,200,1000], #number of trees, change it to 1000 for better results\n",
+    "              'seed': [1337]}\n",
+    "\n",
+    "#grid = GridSearchCV(model, param_grid,n_jobs=-1, cv=3,verbose=3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.070Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "grid = GridSearchCV(model, param_grid,n_jobs=-1, cv=4,verbose=3)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.072Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "print(param_grid)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.073Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "grid.fit(X_train_scaled, y_train)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.075Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "bc2 = grid.best_estimator_\n",
+    "model2 =bc2.fit(X_train_scaled, y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.076Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "\n",
+    "print(grid.best_params_)\n",
+    "print(grid.best_score_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.078Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "bc2 = grid.best_estimator_\n",
+    "print(f\"Training Data Score: {bc2.score(X_train_scaled, y_train)}\")\n",
+    "print(f\"Testing Data Score: {bc2.score(X_test_scaled, y_test)}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "start_time": "2020-07-07T03:24:37.079Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "predictions = model2.predict(X_test_scaled)\n",
+    "#predictions = np.argmax(predictions, axis=1)\n",
+    "#best_preds = np.asarray([np.argmax(line) for line in predictions])\n",
+    "\n",
+    "ax = plot_confusion_matrix(y_test, predictions, classes,False,\"XGBoost\")\n",
+    "plt.savefig(\"XGBoost.png\")\n",
+    "ax"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernel_info": {
+   "name": "dev"
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.10"
+  },
+  "nteract": {
+   "version": "0.12.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
